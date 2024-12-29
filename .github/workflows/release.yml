@@ -1,0 +1,26 @@
+name: Release luau-lsp emscripten build
+on: [workflow_dispatch]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - run: ./build-emscripten.sh
+      - name: generate the release tag
+        id: tag
+        run: |
+          echo "release_tag=$(date +"%Y.%m.%d")" >> $GITHUB_OUTPUT
+          echo "release_date=$(date +"%Y.%m.%d")" >> $GITHUB_OUTPUT
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        with:
+          prerelease: false
+          files: |
+            luau-lsp.js
+            luau-lsp.wasm
+          name: emscripten ${{ steps.tag.outputs.release_tag }}
+          tag_name: ${{ steps.tag.outputs.release_tag }}
